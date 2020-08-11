@@ -12,17 +12,28 @@ library(ggplot2)
 
 ```
 
-```{r}
+```{r,echo=FALSE,message=FALSE,warning=FALSE}
 Death_states<-read_csv("./raw_data/US_MAP_DATA.csv") %>% select("jurisdiction", "Total Death","fips") %>% rename("State"="jurisdiction","Total_Deaths"="Total Death") %>%filter(between(fips, "01","56")) %>%  write_csv("./output/deaths_by_state.csv")
 ```
 
-```{r}
-Normal_States<-read_csv("./raw_data/US_MAP_DATA.csv") %>% select("jurisdiction", "Death_100k", "fips") %>% rename("State"="jurisdiction")  %>% filter(between(fips, "01","56")) %>% write_csv("./output/normalized_deaths_by_state.csv")
+```{r,echo=FALSE,message=FALSE,warning=FALSE}
+Normal_States<-read_csv("./raw_data/US_MAP_DATA.csv") %>% select("jurisdiction", "Death_100k", "fips") %>% rename("State"="jurisdiction","Deaths_per_100000"="Death_100k")  %>% filter(between(fips, "01","56")) %>% write_csv("./output/normalized_deaths_by_state.csv")
 ```
 
-```{r}
+```{r,echo=FALSE,message=FALSE,fig.align='center'}
 pleth<- read_csv("./output/deaths_by_state.csv") %>% transmute(region=tolower(State), Total_Deaths) %>% right_join(map_data("state"), by = "region")
-ggplot(pleth, aes(x=long, y=lat, fill=Total_Deaths, group=group))+ geom_polygon()+coord_map()
+ggplot(pleth, aes(x=long, y=lat, fill=Total_Deaths, group=group))+ geom_polygon()+coord_map()+labs(title="Total COVID Deaths by State")
 
 ```
 
+
+This graph shows that the largest number of deaths per state are happening in the states with large populations. New Jersey seems to have the highest number of deaths.
+
+
+```{r,echo=FALSE,message=FALSE,fig.align='center'}
+normalpleth<-read_csv("./output/normalized_deaths_by_state.csv") %>% transmute(region=tolower(State), Deaths_per_100000)%>% right_join(map_data("state"), by = "region")
+ggplot(normalpleth, aes(x=long, y=lat, fill=Deaths_per_100000, group=group))+ geom_polygon()+coord_map()+labs(title = "COVID State Deaths per 100000")
+```
+
+
+This shows us a much less dense number ruled by population. And yet again New Jersey comes out on top with the most deaths per 100000 people.
