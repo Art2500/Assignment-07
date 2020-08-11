@@ -1,0 +1,28 @@
+
+
+```{r setup,include=FALSE,echo=FALSE, message=FALSE}
+library(tidyverse)
+library(kableExtra)
+library(HelpersMG)
+library(choroplethr)
+library(choroplethrMaps)
+library(devtools)
+library(dplyr)
+library(ggplot2)
+
+```
+
+```{r}
+Death_states<-read_csv("./raw_data/US_MAP_DATA.csv") %>% select("jurisdiction", "Total Death","fips") %>% rename("State"="jurisdiction","Total_Deaths"="Total Death") %>%filter(between(fips, "01","56")) %>%  write_csv("./output/deaths_by_state.csv")
+```
+
+```{r}
+Normal_States<-read_csv("./raw_data/US_MAP_DATA.csv") %>% select("jurisdiction", "Death_100k", "fips") %>% rename("State"="jurisdiction")  %>% filter(between(fips, "01","56")) %>% write_csv("./output/normalized_deaths_by_state.csv")
+```
+
+```{r}
+pleth<- read_csv("./output/deaths_by_state.csv") %>% transmute(region=tolower(State), Total_Deaths) %>% right_join(map_data("state"), by = "region")
+ggplot(pleth, aes(x=long, y=lat, fill=Total_Deaths, group=group))+ geom_polygon()+coord_map()
+
+```
+
